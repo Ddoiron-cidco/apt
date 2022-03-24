@@ -1,0 +1,35 @@
+name: Update packages
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Rebase to main
+        run: |
+          git config --global user.name 'Radxa'
+          git config --global user.email 'dev@radxa.com'
+          git fetch
+          git switch gh-pages
+          git rebase -X theirs main
+      - name: Update packages
+        uses: radxa-repo/apt-repo-action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          organization: radxa-pkg
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+      - name: Commit changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          cat << E~O~F | gpg --import
+          ${{ secrets.GPG_KEY }}
+          E~O~F
+          freight cache
+          git add .
+          git commit -m "Update packages"
+          git push -f

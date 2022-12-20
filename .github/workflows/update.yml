@@ -25,9 +25,9 @@ jobs:
       - name: Check for modified files
         id: git-check
         run: |
-          echo "modified='$(git status --porcelain)'" >> "$GITHUB_OUTPUT"
+          echo "modified=$([ -z $(git status --porcelain) ]; echo $?)" >> "$GITHUB_OUTPUT"
       - name: Commit changes
-        if: steps.git-check.outputs.modified != ''
+        if: steps.git-check.outputs.modified == 1
         run: |
           cat << EOF | gpg --import
           ${{ secrets.GPG_KEY }}

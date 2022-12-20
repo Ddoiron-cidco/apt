@@ -15,6 +15,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch --all
           git rebase -X theirs main
       - name: Update packages
         uses: radxa-repo/apt-repo-action@main
@@ -24,9 +25,9 @@ jobs:
       - name: Check for modified files
         id: git-check
         run: |
-          echo "modified=$([ -z "$(git status --porcelain)" ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
+          echo "modified='$(git status --porcelain)'" >> "$GITHUB_OUTPUT"
       - name: Commit changes
-        if: steps.git-check.outputs.modified == 'true'
+        if: steps.git-check.outputs.modified != ''
         run: |
           cat << EOF | gpg --import
           ${{ secrets.GPG_KEY }}

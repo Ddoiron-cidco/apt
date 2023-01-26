@@ -2,7 +2,8 @@
   "*": {
     "Releases": [
       "bullseye",
-      "jammy"
+      "jammy",
+      "focal"
     ]
   }
 }
